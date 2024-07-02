@@ -160,6 +160,7 @@ public class Help {
         String examplesTemplate = metaTemplates.get("examples_template");
         String exampleTemplate = metaTemplates.get("example_template");
         String descriptionTemplate = metaTemplates.get("description_template");
+        boolean descListTemp = false;
         for (Map.Entry<String, Map<String, Object>> entry : meta.entrySet()) {
             Map<String, Object> action = entry.getValue();
             String key = entry.getKey();
@@ -167,7 +168,7 @@ public class Help {
             if (shortClass == null) continue;
             List<String> descriptionList = (List<String>)action.get("description");
             if (descriptionList.size() == 1 && descriptionList.get(0).trim().isEmpty()) {
-                descriptionList.clear();
+                descListTemp = descriptionList.isEmpty();
             }
             String description;
             if (descriptionList.isEmpty()) {
