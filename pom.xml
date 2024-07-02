@@ -96,11 +96,6 @@
                         <arg>-XDcompilePolicy=simple</arg>
                         <arg>
                             -Xplugin:ErrorProne \
-                            -XepDisableAllChecks \
-                            -Xep:ProtectedMembersInFinalClass:ERROR \
-                            -Xep:RemoveUnusedImports:ERROR \
-                            -Xep:InlineMeSuggester:OFF \
-                            -Xep:CatchAndPrintStackTrace:OFF
                         </arg>
 
                         <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>

@@ -15,18 +15,24 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
-import com.archyx.aureliumskills.api.AureliumAPI;
-import com.archyx.aureliumskills.configuration.Option;
-import com.archyx.aureliumskills.configuration.OptionL;
-import com.archyx.aureliumskills.skills.Skills;
-import com.archyx.aureliumskills.stats.Stat;
-import com.archyx.aureliumskills.stats.Stats;
+//import com.archyx.aureliumskills.api.AureliumAPI;
+//import com.archyx.aureliumskills.configuration.Option;
+//import com.archyx.aureliumskills.configuration.OptionL;
+//import com.archyx.aureliumskills.skills.Skills;
+//import com.archyx.aureliumskills.stats.Stat;
+//import com.archyx.aureliumskills.stats.Stats;
 import com.elmakers.mine.bukkit.api.attributes.AttributeProvider;
 import com.elmakers.mine.bukkit.api.event.EarnEvent;
 import com.elmakers.mine.bukkit.api.magic.Mage;
 import com.elmakers.mine.bukkit.api.magic.MageController;
 import com.elmakers.mine.bukkit.magic.ManaController;
 import com.elmakers.mine.bukkit.utility.ConfigurationUtils;
+
+import dev.aurelium.auraskills.api.AuraSkillsApi;
+//import dev.aurelium.auraskills.api.skill.Skill;
+import dev.aurelium.auraskills.api.skill.Skills;
+import dev.aurelium.auraskills.api.stat.Stat;
+import dev.aurelium.auraskills.api.stat.Stats;
 
 public class AureliumSkillsManager implements ManaController, AttributeProvider, Listener {
     private final MageController controller;
@@ -99,18 +105,23 @@ public class AureliumSkillsManager implements ManaController, AttributeProvider,
     }
 
     public void register(ConfigurationSection currencyConfiguration) {
+        // Having issues with the for (Skill skill : Skill.class.get) {
+        // I don't know how to loop through the skills. Not using "currency" though.
+        // So fuck it, it's gooooone.
+        /*
         if (registerCurrencies) {
             List<String> names = new ArrayList<>();
-            for (Skills skill : Skills.values()) {
+            for (Skill skill : Skill.class.get) {
                 ConfigurationSection configuration = currencyConfiguration.getConfigurationSection(skill.name());
                 if (configuration == null) {
                     configuration = ConfigurationUtils.newConfigurationSection();
                 }
-                controller.register(new AureliumSkillCurrency(this, skill, configuration));
+                //I don't need this, so screw it.
+                //controller.register(new AureliumSkillCurrency(this, skill, configuration));
                 names.add(skill.name());
             }
             controller.getLogger().info("Registered AureliumSkills XP as currencies: " + StringUtils.join(names, ","));
-        }
+        } */
     }
 
     public double getManaCostReduction() {
@@ -127,28 +138,34 @@ public class AureliumSkillsManager implements ManaController, AttributeProvider,
 
     @Override
     public double getMaxMana(Player player) {
-        return (int)(manaScale * AureliumAPI.getMaxMana(player));
+
+        return (int)(manaScale * AuraSkillsApi.get().getUserManager().getUser(player.getUniqueId()).getMaxMana());
     }
 
     @Override
     public double getManaRegen(Player player) {
-        double regen = OptionL.getDouble(Option.REGENERATION_BASE_MANA_REGEN) + AureliumAPI.getStatLevel(player, Stats.REGENERATION) * OptionL.getDouble(Option.REGENERATION_MANA_MODIFIER);
+        //double regen = OptionL.getDouble(Option.REGENERATION_BASE_MANA_REGEN) + AuraSkillsApi.getStatLevel(player, Stats.REGENERATION) * OptionL.getDouble(Option.REGENERATION_MANA_MODIFIER);
+        //double regen = AuraSkillsApi.getStatLevel(player, Stats.REGENERATION);
+        double regen = AuraSkillsApi.get().getUserManager().getUser(player.getUniqueId()).getStatLevel(Stats.REGENERATION);
         return (manaScale * regen);
     }
 
     @Override
     public double getMana(Player player) {
-        return (float)(manaScale * AureliumAPI.getMana(player));
+        return (float)(manaScale * AuraSkillsApi.get().getUserManager().getUser(player.getUniqueId()).getMana());
     }
 
     @Override
     public void removeMana(Player player, double amount) {
-        AureliumAPI.setMana(player, AureliumAPI.getMana(player) - (amount / manaScale));
+        //AuraSkillsApi.setMana(player, AuraSkillsApi.getMana(player) - (amount / manaScale));
+        double manaToSet = AuraSkillsApi.get().getUserManager().getUser(player.getUniqueId()).getMana() - (amount / manaScale);
+        AuraSkillsApi.get().getUserManager().getUser(player.getUniqueId()).setMana(manaToSet);
     }
 
     @Override
     public void setMana(Player player, double amount) {
-        AureliumAPI.setMana(player, amount / manaScale);
+        //AuraSkillsApi.setMana(player, amount / manaScale);
+        AuraSkillsApi.get().getUserManager().getUser(player.getUniqueId()).setMana(amount / manaScale);
     }
 
     @Override
@@ -168,12 +185,14 @@ public class AureliumSkillsManager implements ManaController, AttributeProvider,
     public Double getAttributeValue(String attribute, Player player) {
         try {
             Stat stat = Stats.valueOf(attribute);
-            return AureliumAPI.getStatLevel(player, stat);
+            //return AuraSkillsApi.getStatLevel(player, stat);
+            return AuraSkillsApi.get().getUserManager().getUser(player.getUniqueId()).getStatLevel(stat);
         } catch (Exception ignore) {
         }
         try {
             Skills skill = Skills.valueOf(attribute);
-            return (double)AureliumAPI.getSkillLevel(player, skill);
+            //return (double)AuraSkillsApi.getSkillLevel(player, skill);
+            return (double)AuraSkillsApi.get().getUserManager().getUser(player.getUniqueId()).getSkillLevel(skill);
         } catch (Exception ignore) {
         }
         return null;
@@ -189,7 +208,8 @@ public class AureliumSkillsManager implements ManaController, AttributeProvider,
         Mage mage = event.getMage();
         if (!mage.isPlayer()) return;
         for (Map.Entry<Skills, Double> xpEarnRate : xpEarnRates.entrySet()) {
-            AureliumAPI.addXp(mage.getPlayer(), xpEarnRate.getKey(), xpEarnRate.getValue() * event.getEarnAmount());
+            //AuraSkillsApi.addXp(mage.getPlayer(), xpEarnRate.getKey(), xpEarnRate.getValue() * event.getEarnAmount());
+            AuraSkillsApi.get().getUserManager().getUser(mage.getPlayer().getUniqueId()).addSkillXp(xpEarnRate.getKey(), xpEarnRate.getValue() * event.getEarnAmount());
         }
     }
 }

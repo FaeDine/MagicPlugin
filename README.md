@@ -1,3 +1,16 @@
+Original README.md below...
+========
+
+A quick fork I made of the wonderful Magic Plugin by Nathan Wolf to update it to work with the new AuraSkills (formerly Aurelium Skills) API.
+
+It should work with everything its supposed to, _however_ I could not get it to use the AuraSkills XP as _currency_ for learning new Spells. It hooks fine into the Mana system and using the Sorcery skill, but still requires having its own independent system for Spell Points. I didn't need this functionality so gave up on trying to get it to work.
+
+My code changes are pretty rough, not terribly tidy, but I don't care because I got working what I needed. :)
+
+
+Feel free to use this fork however you like. I've compiled some .jars and tossed them up here, but feel free to clone the repo and do it yourself if you don't feel like trusting an Internet rando.
+
+
 Magic
 ========
 
